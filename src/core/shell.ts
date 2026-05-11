@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
 function renderSidebar(): string {
   return `
     <div class="sidebar-header">
-      <div class="sidebar-brand">Hoothin Tools</div>
+      <div class="sidebar-brand">月光宝盒</div>
       <div class="sidebar-subtitle">Utility Platform</div>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav">
@@ -82,7 +82,7 @@ function updateBreadcrumb() {
 
   const currentId = getCurrentToolId();
   if (currentId === 'home') {
-    el.innerHTML = `<span style="font-weight: 600; font-size: 13px;">Hoothin Online Tools</span>`;
+    el.innerHTML = `<span style="font-weight: 600; font-size: 13px;">月光宝盒</span>`;
   } else {
     const registry = getRegistry();
     const tool = registry.find(t => t.id === currentId);

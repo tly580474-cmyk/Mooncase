@@ -1,4 +1,4 @@
-const PREFIX = 'hoothin_';
+const PREFIX = 'moonbox_';
 
 export function getItem<T>(key: string, fallback: T): T {
   try {

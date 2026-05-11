@@ -40,7 +40,7 @@ function renderHero(): string {
   return `
     <section class="hero mb-12">
       <div style="position: relative; z-index: 1; max-width: 640px;">
-        <h1 style="font: var(--text-headline-lg); margin-bottom: 16px;">欢迎使用 Hoothin 在线工具</h1>
+        <h1 style="font: var(--text-headline-lg); margin-bottom: 16px;">欢迎使用月光宝盒在线工具</h1>
         <p style="font: var(--text-body-lg); opacity: 0.9; margin-bottom: 32px;">
           高效、安全、免安装的专业在线工具箱。涵盖文本处理、代码格式化、图像编辑等上百款实用工具，助您轻松提升工作效率。
         </p>
