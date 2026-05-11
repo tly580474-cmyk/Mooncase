@@ -26,14 +26,14 @@ function mdToHtml(md: string): string {
     // 水平线
     .replace(/^---+$/gm, '<hr />')
     // 无序列表
-    .replace(/^[\-\*]\s+(.+)$/gm, '<li>$1</li>')
+    .replace(/^[\-\*]\s+(.+)$/gm, '<li data-list="ul">$1</li>')
     // 有序列表
-    .replace(/^\d+\.\s+(.+)$/gm, '<li>$1</li>')
+    .replace(/^\d+\.\s+(.+)$/gm, '<li data-list="ol">$1</li>')
     // 引用
     .replace(/^>\s+(.+)$/gm, '<blockquote>$1</blockquote>')
-    // 表格行
+    // 表格行（标记分隔行，后续处理时识别表头）
     .replace(/^\|(.+)\|$/gm, (_match, content) => {
-      if (/^[\s\-:|]+$/.test(content)) return '';
+      if (/^[\s\-:|]+$/.test(content)) return '<tr-sep />';
       const cells = content.split('|').map((c: string) => c.trim());
       return '<tr>' + cells.map((c: string) => `<td>${c}</td>`).join('') + '</tr>';
     });
@@ -42,15 +42,30 @@ function mdToHtml(md: string): string {
   const lines = html.split('\n');
   const result: string[] = [];
   let inList = false;
+  let listType: 'ul' | 'ol' = 'ul';
+  let nextRowIsHeader = false;
 
   for (const line of lines) {
-    if (line.startsWith('<li>')) {
-      if (!inList) { result.push('<ul>'); inList = true; }
-      result.push(line);
+    if (line.startsWith('<li')) {
+      const lt = line.match(/data-list="(ul|ol)"/)?.[1] as 'ul' | 'ol' ?? 'ul';
+      if (!inList || lt !== listType) {
+        if (inList) result.push(`</${listType}>`);
+        listType = lt;
+        result.push(`<${listType}>`);
+        inList = true;
+      }
+      result.push(line.replace(/ data-list="[^"]*"/, ''));
     } else {
-      if (inList) { result.push('</ul>'); inList = false; }
-      if (line.startsWith('<tr>')) {
-        result.push(line);
+      if (inList) { result.push(`</${listType}>`); inList = false; }
+      if (line === '<tr-sep />') {
+        nextRowIsHeader = true;
+      } else if (line.startsWith('<tr>')) {
+        if (nextRowIsHeader) {
+          result.push(line.replace(/<td>/g, '<th>').replace(/<\/td>/g, '</th>'));
+          nextRowIsHeader = false;
+        } else {
+          result.push(line);
+        }
       } else if (line.trim() === '') {
         result.push('');
       } else if (line.startsWith('<h') || line.startsWith('<hr') || line.startsWith('<pre') || line.startsWith('<blockquote') || line.startsWith('<img')) {
@@ -60,7 +75,7 @@ function mdToHtml(md: string): string {
       }
     }
   }
-  if (inList) result.push('</ul>');
+  if (inList) result.push(`</${listType}>`);
 
   return result.join('\n');
 }
@@ -85,10 +100,11 @@ function wrapWordHtml(bodyHtml: string, title: string): string {
   pre code { background: none; padding: 0; }
   blockquote { border-left: 4px solid #1b57bd; margin: 16px 0; padding: 8px 16px; color: #666; background: #f8f9fb; }
   table { border-collapse: collapse; width: 100%; margin: 16px 0; }
-  td { border: 1px solid #ddd; padding: 8px 12px; }
+  td, th { border: 1px solid #ddd; padding: 8px 12px; }
+  th { background: #f0f4f8; font-weight: bold; text-align: left; }
   hr { border: none; border-top: 1px solid #ddd; margin: 24px 0; }
   img { max-width: 100%; }
-  ul { padding-left: 24px; }
+  ul, ol { padding-left: 24px; }
   li { margin: 4px 0; }
 </style>
 </head>

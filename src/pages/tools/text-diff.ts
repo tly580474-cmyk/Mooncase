@@ -1,5 +1,39 @@
 import { icon } from '../../core/icons';
 
+type DiffOp = { type: 'equal' | 'add' | 'del'; leftIdx?: number; rightIdx?: number; text: string };
+
+function computeLCS(a: string[], b: string[]): DiffOp[] {
+  const m = a.length, n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+
+  const ops: DiffOp[] = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) {
+      ops.push({ type: 'equal', leftIdx: i - 1, rightIdx: j - 1, text: a[i - 1] });
+      i--; j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      ops.push({ type: 'add', rightIdx: j - 1, text: b[j - 1] });
+      j--;
+    } else {
+      ops.push({ type: 'del', leftIdx: i - 1, text: a[i - 1] });
+      i--;
+    }
+  }
+
+  return ops.reverse();
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 export default {
   id: 'text-diff',
   name: '文本差异对比',
@@ -50,20 +84,37 @@ export default {
 
       const leftLines = left.split('\n');
       const rightLines = right.split('\n');
-      const maxLen = Math.max(leftLines.length, rightLines.length);
+      const ops = computeLCS(leftLines, rightLines);
 
       let html = '<table class="diff-table">';
-      for (let i = 0; i < maxLen; i++) {
-        const l = leftLines[i] ?? '';
-        const r = rightLines[i] ?? '';
-        const isSame = l === r;
-        const cls = isSame ? '' : (l && !r ? 'diff-del' : (!l && r ? 'diff-add' : 'diff-mod'));
-        html += `<tr class="${cls}">
-          <td class="diff-ln">${i + 1}</td>
-          <td class="diff-text">${escapeHtml(l)}</td>
-          <td class="diff-ln">${i + 1}</td>
-          <td class="diff-text">${escapeHtml(r)}</td>
-        </tr>`;
+      let leftNum = 0, rightNum = 0;
+      for (const op of ops) {
+        if (op.type === 'equal') {
+          leftNum++;
+          rightNum++;
+          html += `<tr>
+            <td class="diff-ln">${leftNum}</td>
+            <td class="diff-text">${escapeHtml(op.text)}</td>
+            <td class="diff-ln">${rightNum}</td>
+            <td class="diff-text">${escapeHtml(op.text)}</td>
+          </tr>`;
+        } else if (op.type === 'del') {
+          leftNum++;
+          html += `<tr class="diff-del">
+            <td class="diff-ln">${leftNum}</td>
+            <td class="diff-text">${escapeHtml(op.text)}</td>
+            <td class="diff-ln"></td>
+            <td class="diff-text"></td>
+          </tr>`;
+        } else {
+          rightNum++;
+          html += `<tr class="diff-add">
+            <td class="diff-ln"></td>
+            <td class="diff-text"></td>
+            <td class="diff-ln">${rightNum}</td>
+            <td class="diff-text">${escapeHtml(op.text)}</td>
+          </tr>`;
+        }
       }
       html += '</table>';
       outputEl.innerHTML = html;
@@ -77,7 +128,3 @@ export default {
     });
   },
 };
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
