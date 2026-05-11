@@ -37,15 +37,6 @@ function renderSidebar(): string {
         </a>
       `).join('')}
     </nav>
-    <div class="sidebar-footer">
-      <div class="nav-item" style="cursor: default;">
-        <span class="icon">${icon('person')}</span>
-        <div>
-          <div style="font-weight: 600; font-size: 13px;">User Account</div>
-          <div style="font-size: 10px; opacity: 0.6;">Guest Session</div>
-        </div>
-      </div>
-    </div>
   `;
 }
 
