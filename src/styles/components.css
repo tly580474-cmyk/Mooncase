@@ -393,6 +393,38 @@
   flex-wrap: wrap;
 }
 
+.tool-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container-lowest);
+  color: var(--color-on-surface);
+  font: var(--text-body-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.tool-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-fixed-dim);
+}
+
+.tool-select {
+  padding: 10px 14px;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container-lowest);
+  color: var(--color-on-surface);
+  font: var(--text-body-md);
+  cursor: pointer;
+}
+
+.tool-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
 .tool-checkbox {
   display: inline-flex;
   align-items: center;

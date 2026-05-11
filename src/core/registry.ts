@@ -138,6 +138,48 @@ const registry: ToolMeta[] = [
     description: '查询当前公网 IP 地址',
     tags: ['ip', '查询', '网络'],
   },
+  // 图片工具
+  {
+    id: 'image-compress',
+    name: '图片压缩',
+    icon: 'compress',
+    category: 'image',
+    description: '在线压缩图片文件大小',
+    tags: ['image', 'compress', '压缩', '图片'],
+  },
+  {
+    id: 'image-crop',
+    name: '图片裁剪',
+    icon: 'crop',
+    category: 'image',
+    description: '在线裁剪和调整图片尺寸',
+    tags: ['image', 'crop', '裁剪', '图片'],
+  },
+  {
+    id: 'image-base64',
+    name: '图片转 Base64',
+    icon: 'image',
+    category: 'image',
+    description: '将图片转换为 Base64 编码字符串',
+    tags: ['image', 'base64', '图片', '编码'],
+  },
+  // 安全工具
+  {
+    id: 'hash-gen',
+    name: '哈希生成',
+    icon: 'hash',
+    category: 'security',
+    description: '生成文本的 MD5 / SHA-1 / SHA-256 哈希值',
+    tags: ['hash', 'md5', 'sha', '哈希', '加密'],
+  },
+  {
+    id: 'hmac-gen',
+    name: 'HMAC 签名',
+    icon: 'lock',
+    category: 'security',
+    description: '使用密钥生成 HMAC 签名',
+    tags: ['hmac', '签名', '安全', '密钥'],
+  },
 ];
 
 export function getRegistry(): ToolMeta[] {

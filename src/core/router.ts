@@ -32,6 +32,28 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'char-count': () => import('../pages/tools/char-count'),
   'text-dedup': () => import('../pages/tools/text-dedup'),
   'word-extract': () => import('../pages/tools/word-extract'),
+  // 代码工具
+  'json-formatter': () => import('../pages/tools/json-formatter'),
+  'code-beautify': () => import('../pages/tools/code-beautify'),
+  'regex-test': () => import('../pages/tools/regex-test'),
+  // 格式转换
+  'base64': () => import('../pages/tools/base64'),
+  'url-encode': () => import('../pages/tools/url-encode'),
+  // 生成器
+  'password-gen': () => import('../pages/tools/password-gen'),
+  'uuid-gen': () => import('../pages/tools/uuid-gen'),
+  'lorem-gen': () => import('../pages/tools/lorem-gen'),
+  // 图片工具
+  'image-compress': () => import('../pages/tools/image-compress'),
+  'image-crop': () => import('../pages/tools/image-crop'),
+  'image-base64': () => import('../pages/tools/image-base64'),
+  // 安全工具
+  'hash-gen': () => import('../pages/tools/hash-gen'),
+  'hmac-gen': () => import('../pages/tools/hmac-gen'),
+  // 实用工具
+  'qr-code': () => import('../pages/tools/qr-code'),
+  // 网络工具
+  'ip-query': () => import('../pages/tools/ip-query'),
 };
 
 function getToolId(): string {
