@@ -10,7 +10,7 @@ type ToolModule = {
 
 type RouteHandler = () => void;
 
-let currentTool: ToolModule['default'] | null = null;
+let currentToolId: string | null = null;
 let contentArea: HTMLElement | null = null;
 const listeners: RouteHandler[] = [];
 
@@ -66,28 +66,24 @@ function setContentArea(el: HTMLElement) {
 }
 
 async function navigate(toolId: string) {
-  if (toolId === getToolId() && currentTool) return;
-
-  // 销毁当前工具
-  if (currentTool?.destroy) {
-    currentTool.destroy();
-  }
+  // 如果是同一个工具，跳过
+  if (toolId === currentToolId) return;
 
   if (!contentArea) return;
+
+  currentToolId = toolId;
 
   // 加载新工具
   const loader = toolLoaders[toolId];
   if (!loader) {
     contentArea.innerHTML = `<div class="content"><h2>404 - 工具未找到</h2></div>`;
-    currentTool = null;
     return;
   }
 
   try {
     const mod = await loader();
-    currentTool = mod.default;
     contentArea.innerHTML = '';
-    currentTool.render(contentArea);
+    mod.default.render(contentArea);
   } catch (err) {
     console.error('Failed to load tool:', toolId, err);
     contentArea.innerHTML = `<div class="content"><h2>加载失败</h2><p>${err}</p></div>`;
