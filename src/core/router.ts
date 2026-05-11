@@ -17,6 +17,21 @@ const listeners: RouteHandler[] = [];
 // 工具路由表 - 懒加载
 const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'home': () => import('../pages/home'),
+  // 分类页
+  'text': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('text') })),
+  'image': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('image') })),
+  'code': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('code') })),
+  'conversion': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('conversion') })),
+  'generator': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('generator') })),
+  'security': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('security') })),
+  'utility': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('utility') })),
+  'network': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('network') })),
+  // 文本工具
+  'text-diff': () => import('../pages/tools/text-diff'),
+  'full-half-width': () => import('../pages/tools/full-half-width'),
+  'char-count': () => import('../pages/tools/char-count'),
+  'text-dedup': () => import('../pages/tools/text-dedup'),
+  'word-extract': () => import('../pages/tools/word-extract'),
 };
 
 function getToolId(): string {

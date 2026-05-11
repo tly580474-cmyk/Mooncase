@@ -21,7 +21,7 @@ const registry: ToolMeta[] = [
   {
     id: 'text-diff',
     name: '文本差异对比',
-    icon: 'diff',
+    icon: 'difference',
     category: 'text',
     description: '高亮显示两段文本的逐行差异',
     tags: ['diff', 'compare', '对比', '差异', '文本'],
