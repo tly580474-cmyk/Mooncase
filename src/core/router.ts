@@ -32,6 +32,13 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'char-count': () => import('../pages/tools/char-count'),
   'text-dedup': () => import('../pages/tools/text-dedup'),
   'word-extract': () => import('../pages/tools/word-extract'),
+  'text-replace': () => import('../pages/tools/text-replace'),
+  'char-counter': () => import('../pages/tools/char-counter'),
+  'case-converter': () => import('../pages/tools/case-converter'),
+  'cn-traditional': () => import('../pages/tools/cn-traditional'),
+  'en-case': () => import('../pages/tools/en-case'),
+  'hanzi-pinyin': () => import('../pages/tools/hanzi-pinyin'),
+  'md-to-word': () => import('../pages/tools/md-to-word'),
   // 代码工具
   'json-formatter': () => import('../pages/tools/json-formatter'),
   'code-beautify': () => import('../pages/tools/code-beautify'),
