@@ -183,6 +183,16 @@ export async function runUpscale(
   imageData: ImageData,
   options: UpscaleOptions,
 ): Promise<ImageData> {
+  if (options.mode === 'anime4k') {
+    const { runAnime4kUpscale } = await import('./anime4k');
+    return runAnime4kUpscale(imageData, {
+      scale: options.scale,
+      sharpenStrength: options.sharpenStrength,
+      contrastLevel: options.contrastLevel,
+      onProgress: options.onProgress,
+    });
+  }
+
   const modelKey = `${options.scale}x`;
 
   if (currentModelKey !== modelKey || !currentSession) {
