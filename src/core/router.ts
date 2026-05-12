@@ -11,8 +11,10 @@ type ToolModule = {
 type RouteHandler = () => void;
 
 let currentToolId: string | null = null;
+let currentDestroy: (() => void) | null = null;
 let contentArea: HTMLElement | null = null;
 const listeners: RouteHandler[] = [];
+let suppressHashChange = false;
 
 // 工具路由表 - 懒加载
 const toolLoaders: Record<string, () => Promise<ToolModule>> = {
@@ -21,6 +23,7 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'text': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('text') })),
   'image': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('image') })),
   'code': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('code') })),
+  'encoding': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('encoding') })),
   'conversion': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('conversion') })),
   'generator': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('generator') })),
   'security': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('security') })),
@@ -33,19 +36,29 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'text-dedup': () => import('../pages/tools/text-dedup'),
   'word-extract': () => import('../pages/tools/word-extract'),
   'text-replace': () => import('../pages/tools/text-replace'),
-  'char-counter': () => import('../pages/tools/char-counter'),
   'case-converter': () => import('../pages/tools/case-converter'),
   'cn-traditional': () => import('../pages/tools/cn-traditional'),
   'en-case': () => import('../pages/tools/en-case'),
   'hanzi-pinyin': () => import('../pages/tools/hanzi-pinyin'),
   'md-to-word': () => import('../pages/tools/md-to-word'),
+  'char-counter': () => import('../pages/tools/char-counter'),
   // 代码工具
   'json-formatter': () => import('../pages/tools/json-formatter'),
   'code-beautify': () => import('../pages/tools/code-beautify'),
   'regex-test': () => import('../pages/tools/regex-test'),
+  'markdown-preview': () => import('../pages/tools/markdown-preview'),
+  'code-highlight': () => import('../pages/tools/code-highlight'),
+  'image-base64-code': () => import('../pages/tools/image-base64-code'),
+  'svg-to-base64': () => import('../pages/tools/svg-to-base64'),
+  'ascii-art': () => import('../pages/tools/ascii-art'),
   // 格式转换
   'base64': () => import('../pages/tools/base64'),
   'url-encode': () => import('../pages/tools/url-encode'),
+  // 编码解码
+  'unicode': () => import('../pages/tools/unicode'),
+  'base-x': () => import('../pages/tools/base-x'),
+  'morse': () => import('../pages/tools/morse'),
+  'jwt-decode': () => import('../pages/tools/jwt-decode'),
   // 生成器
   'password-gen': () => import('../pages/tools/password-gen'),
   'uuid-gen': () => import('../pages/tools/uuid-gen'),
@@ -84,7 +97,22 @@ async function navigate(toolId: string) {
 
   if (!contentArea) return;
 
+  // 销毁上一个工具
+  if (currentDestroy) {
+    currentDestroy();
+    currentDestroy = null;
+  }
+
   currentToolId = toolId;
+
+  // 更新 URL hash（不触发 hashchange 循环）
+  const expectedHash = '#/' + toolId;
+  if (location.hash !== expectedHash) {
+    suppressHashChange = true;
+    location.hash = expectedHash;
+    // 下一个事件循环解除抑制
+    setTimeout(() => { suppressHashChange = false; }, 0);
+  }
 
   // 加载新工具
   const loader = toolLoaders[toolId];
@@ -97,6 +125,7 @@ async function navigate(toolId: string) {
     const mod = await loader();
     contentArea.innerHTML = '';
     mod.default.render(contentArea);
+    currentDestroy = mod.default.destroy ?? null;
   } catch (err) {
     console.error('Failed to load tool:', toolId, err);
     contentArea.innerHTML = `<div class="content"><h2>加载失败</h2><p>${err}</p></div>`;
@@ -119,6 +148,7 @@ function getCurrentToolId(): string {
 
 function initRouter() {
   window.addEventListener('hashchange', () => {
+    if (suppressHashChange) return;
     navigate(getToolId());
   });
 }

@@ -8,7 +8,7 @@ export default {
     container.innerHTML = `
       <div class="content">
         <div class="tool-page-header">
-          <a href="#/conversion" class="tool-page-back">${icon('swap_horiz')} 格式转换</a>
+          <a href="#/encoding" class="tool-page-back">${icon('binary')} 编码解码</a>
           <h1 style="font: var(--text-headline-md);">URL 编码</h1>
           <p style="font: var(--text-body-md); color: var(--color-on-surface-variant);">URL 编码与解码</p>
         </div>

@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { id: 'text', label: '文本工具', icon: 'description', category: 'text' },
   { id: 'image', label: '图片工具', icon: 'image', category: 'image' },
   { id: 'code', label: '代码工具', icon: 'code', category: 'code' },
+  { id: 'encoding', label: '编码解码', icon: 'binary', category: 'encoding' },
   { id: 'conversion', label: '格式转换', icon: 'swap_horiz', category: 'conversion' },
   { id: 'generator', label: '生成器', icon: 'settings_suggest', category: 'generator' },
   { id: 'security', label: '安全工具', icon: 'security', category: 'security' },

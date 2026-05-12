@@ -8,6 +8,7 @@ const categoryNames: Record<ToolCategory, string> = {
   image: 'Image Tools',
   code: 'Code Tools',
   conversion: 'Format Conversion',
+  encoding: 'Encoding & Decoding',
   generator: 'Generators',
   security: 'Security',
   utility: 'Utility Tools',
@@ -19,6 +20,7 @@ const categoryIcons: Record<ToolCategory, string> = {
   image: 'image',
   code: 'code',
   conversion: 'swap_horiz',
+  encoding: 'binary',
   generator: 'settings_suggest',
   security: 'security',
   utility: 'build',
@@ -30,6 +32,7 @@ const categoryDescriptions: Record<ToolCategory, string> = {
   image: '图片压缩、转换与在线编辑',
   code: '代码格式化、压缩与测试工具',
   conversion: '各种格式之间的互转工具',
+  encoding: 'Unicode、Base64、URL、摩斯密码等编解码工具',
   generator: '密码、UUID、占位文等生成工具',
   security: '加密、哈希、安全检测工具',
   utility: '二维码、Base64 等实用工具',
@@ -90,7 +93,7 @@ function renderRecent(): string {
 
 function renderBentoGrid(): string {
   const registry = getRegistry();
-  const categories: ToolCategory[] = ['text', 'image', 'code', 'generator', 'network', 'conversion', 'utility', 'security'];
+  const categories: ToolCategory[] = ['text', 'image', 'code', 'encoding', 'generator', 'network', 'conversion', 'utility', 'security'];
 
   return `
     <section class="mb-16">
