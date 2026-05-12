@@ -91,14 +91,83 @@ function tensorToImageData(
   return new ImageData(rgba, outW, outH);
 }
 
+function cropImageData(imageData: ImageData, targetW: number, targetH: number): ImageData {
+  if (imageData.width === targetW && imageData.height === targetH) return imageData;
+  const rgba = new Uint8ClampedArray(targetW * targetH * 4);
+  const src = imageData.data;
+  for (let y = 0; y < targetH; y++) {
+    for (let x = 0; x < targetW; x++) {
+      const si = (y * imageData.width + x) * 4;
+      const di = (y * targetW + x) * 4;
+      rgba[di] = src[si];
+      rgba[di + 1] = src[si + 1];
+      rgba[di + 2] = src[si + 2];
+      rgba[di + 3] = src[si + 3];
+    }
+  }
+  return new ImageData(rgba, targetW, targetH);
+}
+
+function padImageData(
+  imageData: ImageData,
+  scale: number,
+): { padded: ImageData; origW: number; origH: number } {
+  const { width: imgW, height: imgH } = imageData;
+  const padW = Math.ceil(imgW / scale) * scale;
+  const padH = Math.ceil(imgH / scale) * scale;
+
+  if (padW === imgW && padH === imgH) {
+    return { padded: imageData, origW: imgW, origH: imgH };
+  }
+
+  const rgba = new Uint8ClampedArray(padW * padH * 4);
+  const src = imageData.data;
+  for (let y = 0; y < imgH; y++) {
+    for (let x = 0; x < imgW; x++) {
+      const si = (y * imgW + x) * 4;
+      const di = (y * padW + x) * 4;
+      rgba[di] = src[si];
+      rgba[di + 1] = src[si + 1];
+      rgba[di + 2] = src[si + 2];
+      rgba[di + 3] = src[si + 3];
+    }
+  }
+  // Edge-fill: extend right edge
+  for (let y = 0; y < imgH; y++) {
+    for (let x = imgW; x < padW; x++) {
+      const si = (y * imgW + (imgW - 1)) * 4;
+      const di = (y * padW + x) * 4;
+      rgba[di] = src[si];
+      rgba[di + 1] = src[si + 1];
+      rgba[di + 2] = src[si + 2];
+      rgba[di + 3] = src[si + 3];
+    }
+  }
+  // Edge-fill: extend bottom edge
+  for (let y = imgH; y < padH; y++) {
+    for (let x = 0; x < padW; x++) {
+      const srcX = Math.min(x, imgW - 1);
+      const si = ((imgH - 1) * imgW + srcX) * 4;
+      const di = (y * padW + x) * 4;
+      rgba[di] = src[si];
+      rgba[di + 1] = src[si + 1];
+      rgba[di + 2] = src[si + 2];
+      rgba[di + 3] = src[si + 3];
+    }
+  }
+
+  return { padded: new ImageData(rgba, padW, padH), origW: imgW, origH: imgH };
+}
+
 export async function processWithTiling(
   session: any,
   ort: any,
   imageData: ImageData,
   options: UpscaleOptions,
 ): Promise<ImageData> {
-  const { width: imgW, height: imgH, data: imgData } = imageData;
   const scale = options.scale;
+  const { padded, origW, origH } = padImageData(imageData, scale);
+  const { width: imgW, height: imgH, data: imgData } = padded;
   const overlap = options.overlap ?? 16;
   const tileSize = options.tileSize ?? getOptimalTileSize(scale, imgW, imgH);
 
@@ -122,7 +191,7 @@ export async function processWithTiling(
     outputTensor.dispose?.();
 
     options.onProgress?.({ phase: 'done', detail: '完成', percent: 100 });
-    return result;
+    return cropImageData(result, origW * scale, origH * scale);
   }
 
   // Tiled processing
@@ -296,5 +365,5 @@ export async function processWithTiling(
   }
 
   options.onProgress?.({ phase: 'done', detail: '完成', percent: 100 });
-  return outCtx.getImageData(0, 0, outW, outH);
+  return cropImageData(outCtx.getImageData(0, 0, outW, outH), origW * scale, origH * scale);
 }
