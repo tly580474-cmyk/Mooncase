@@ -6,7 +6,6 @@ export type ToolCategory =
   | 'encoding'
   | 'generator'
   | 'security'
-  | 'utility'
   | 'network';
 
 export interface ToolMeta {
@@ -418,7 +417,7 @@ const registry: ToolMeta[] = [
     id: 'hash-gen',
     name: '哈希生成',
     icon: 'hash',
-    category: 'security',
+    category: 'generator',
     description: '生成文本的 MD5 / SHA-1 / SHA-256 哈希值',
     tags: ['hash', 'md5', 'sha', '哈希', '加密'],
   },

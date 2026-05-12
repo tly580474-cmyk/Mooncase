@@ -11,7 +11,6 @@ const categoryNames: Record<ToolCategory, string> = {
   encoding: '编码解码',
   generator: '生成器',
   security: '安全工具',
-  utility: '实用工具',
   network: '网络工具',
 };
 
@@ -23,7 +22,6 @@ const categoryIcons: Record<ToolCategory, string> = {
   encoding: 'binary',
   generator: 'settings_suggest',
   security: 'security',
-  utility: 'build',
   network: 'language',
 };
 
@@ -35,7 +33,6 @@ const categoryDescriptions: Record<ToolCategory, string> = {
   encoding: 'Unicode、Base64、URL、摩斯密码等编解码工具',
   generator: '密码、UUID、占位文等生成工具',
   security: '加密、哈希、安全检测工具',
-  utility: '二维码、Base64 等实用工具',
   network: 'IP 查询、DNS 解析等网络工具',
 };
 
@@ -45,7 +42,7 @@ function renderHero(): string {
       <div style="position: relative; z-index: 1; max-width: 640px;">
         <h1 style="font: var(--text-headline-lg); margin-bottom: 16px;">欢迎使用月光宝盒在线工具</h1>
         <p style="font: var(--text-body-lg); opacity: 0.9; margin-bottom: 32px;">
-          高效、安全、免安装的专业在线工具箱。涵盖文本处理、代码格式化、图像编辑等上百款实用工具，助您轻松提升工作效率。
+          高效、安全、免安装的专业在线工具箱。涵盖文本处理、代码格式化、图像编辑等实用工具，助您轻松提升工作效率。
         </p>
         <div class="search-box">
           <span class="search-icon">${icon('search')}</span>
@@ -93,7 +90,7 @@ function renderRecent(): string {
 
 function renderBentoGrid(): string {
   const registry = getRegistry();
-  const categories: ToolCategory[] = ['text', 'image', 'code', 'encoding', 'generator', 'network', 'conversion', 'utility', 'security'];
+  const categories: ToolCategory[] = ['text', 'image', 'code', 'encoding', 'generator', 'network', 'conversion', 'security'];
 
   return `
     <section class="mb-16">

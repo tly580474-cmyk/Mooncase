@@ -11,7 +11,6 @@ const categoryNames: Record<ToolCategory, string> = {
   encoding: '编码解码',
   generator: '生成器',
   security: '安全工具',
-  utility: '实用工具',
   network: '网络工具',
 };
 
@@ -23,7 +22,6 @@ const categoryDescriptions: Record<ToolCategory, string> = {
   encoding: 'Unicode、Base64、URL、摩斯密码等编解码工具',
   generator: '密码、UUID、占位文等生成工具',
   security: '加密、哈希、安全检测工具',
-  utility: '二维码、Base64 等实用工具',
   network: 'IP 查询、DNS 解析等网络工具',
 };
 
@@ -35,7 +33,6 @@ const categoryColors: Record<ToolCategory, string> = {
   encoding: '#0f766e',
   generator: '#585f6a',
   security: '#ba1a1a',
-  utility: '#71747e',
   network: '#1f59c0',
 };
 

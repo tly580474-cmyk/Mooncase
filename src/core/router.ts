@@ -27,7 +27,6 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'conversion': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('conversion') })),
   'generator': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('generator') })),
   'security': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('security') })),
-  'utility': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('utility') })),
   'network': () => import('../pages/category').then(m => ({ default: m.createCategoryPage('network') })),
   // 文本工具
   'text-diff': () => import('../pages/tools/text-diff'),

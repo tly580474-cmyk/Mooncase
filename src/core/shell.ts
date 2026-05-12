@@ -20,7 +20,6 @@ const navItems: NavItem[] = [
   { id: 'conversion', label: '格式转换', icon: 'swap_horiz', category: 'conversion' },
   { id: 'generator', label: '生成器', icon: 'settings_suggest', category: 'generator' },
   { id: 'security', label: '安全工具', icon: 'security', category: 'security' },
-  { id: 'utility', label: '实用工具', icon: 'build', category: 'utility' },
   { id: 'network', label: '网络工具', icon: 'language', category: 'network' },
 ];
 
