@@ -80,6 +80,13 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'qr-code': () => import('../pages/tools/qr-code'),
   // 网络工具
   'ip-query': () => import('../pages/tools/ip-query'),
+  'online-ping': () => import('../pages/tools/online-ping'),
+  'online-tcping': () => import('../pages/tools/online-tcping'),
+  'website-speed': () => import('../pages/tools/website-speed'),
+  'traceroute': () => import('../pages/tools/traceroute'),
+  'dns-query': () => import('../pages/tools/dns-query'),
+  'find-ping': () => import('../pages/tools/find-ping'),
+  'localhost-net': () => import('../pages/tools/localhost-net'),
 };
 
 function getToolId(): string {

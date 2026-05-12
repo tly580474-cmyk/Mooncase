@@ -69,13 +69,13 @@ const LANGUAGES: Record<string, LangDef> = {
     strings: ['"', "'"],
   },
   sql: {
-    keywords: ['SELECT', 'FROM', 'WHERE', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'INDEX', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON', 'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE', 'IS', 'NULL', 'AS', 'ORDER', 'BY', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'ALL', 'DISTINCT', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES', 'CONSTRAINT', 'DEFAULT', 'AUTO_INCREMENT', 'VARCHAR', 'INT', 'INTEGER', 'TEXT', 'BOOLEAN', 'DATE', 'TIMESTAMP', 'FLOAT', 'DOUBLE', 'DECIMAL', 'SELECT', 'EXISTS', 'ANY', 'SOME'],
+    keywords: ['SELECT', 'FROM', 'WHERE', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'INDEX', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON', 'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE', 'IS', 'NULL', 'AS', 'ORDER', 'BY', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'ALL', 'DISTINCT', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'PRIMARY', 'KEY', 'FOREIGN', 'REFERENCES', 'CONSTRAINT', 'DEFAULT', 'AUTO_INCREMENT', 'VARCHAR', 'INT', 'INTEGER', 'TEXT', 'BOOLEAN', 'DATE', 'TIMESTAMP', 'FLOAT', 'DOUBLE', 'DECIMAL', 'EXISTS', 'ANY', 'SOME'],
     commentSingle: ['--'],
     commentMulti: [['/*', '*/']],
     strings: ['"', "'"],
   },
   bash: {
-    keywords: ['if', 'then', 'else', 'elif', 'fi', 'for', 'while', 'do', 'done', 'case', 'esac', 'in', 'function', 'return', 'exit', 'echo', 'export', 'source', 'alias', 'unalias', 'set', 'unset', 'local', 'readonly', 'declare', 'export', 'eval', 'exec', 'test', 'shift', 'trap', 'wait', 'jobs', 'fg', 'bg', 'kill', 'cd', 'pwd', 'ls', 'cat', 'grep', 'sed', 'awk', 'find', 'sort', 'uniq', 'wc', 'head', 'tail', 'chmod', 'chown', 'mkdir', 'rm', 'cp', 'mv', 'touch', 'chmod', 'sudo', 'apt', 'yum', 'dnf', 'pacman', 'true', 'false', 'null', 'stdin', 'stdout', 'stderr'],
+    keywords: ['if', 'then', 'else', 'elif', 'fi', 'for', 'while', 'do', 'done', 'case', 'esac', 'in', 'function', 'return', 'exit', 'echo', 'export', 'source', 'alias', 'unalias', 'set', 'unset', 'local', 'readonly', 'declare', 'eval', 'exec', 'test', 'shift', 'trap', 'wait', 'jobs', 'fg', 'bg', 'kill', 'cd', 'pwd', 'ls', 'cat', 'grep', 'sed', 'awk', 'find', 'sort', 'uniq', 'wc', 'head', 'tail', 'chmod', 'chown', 'mkdir', 'rm', 'cp', 'mv', 'touch', 'sudo', 'apt', 'yum', 'dnf', 'pacman', 'true', 'false', 'null', 'stdin', 'stdout', 'stderr'],
     commentSingle: ['#'],
     commentMulti: [],
     strings: ['"', "'"],
@@ -175,6 +175,8 @@ const LANG_OPTIONS = [
   ['bash', 'Bash / Shell'],
 ];
 
+let hlDebounceTimer: ReturnType<typeof setTimeout>;
+
 export default {
   id: 'code-highlight',
   name: '代码高亮工具',
@@ -238,10 +240,9 @@ export default {
 
     container.querySelector('#hl-highlight')!.addEventListener('click', doHighlight);
 
-    let debounceTimer: ReturnType<typeof setTimeout>;
     input.addEventListener('input', () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(doHighlight, 300);
+      clearTimeout(hlDebounceTimer);
+      hlDebounceTimer = setTimeout(doHighlight, 300);
     });
     langSelect.addEventListener('change', doHighlight);
     lineNumsCheck.addEventListener('change', doHighlight);
@@ -258,4 +259,5 @@ export default {
       lastHtml = '';
     });
   },
+  destroy() { clearTimeout(hlDebounceTimer); },
 };

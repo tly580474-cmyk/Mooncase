@@ -156,8 +156,8 @@ function renderFlowchart(code: string): string {
       if (!nodes.has(id)) { nodes.set(id, { id, text, type }); order.push(id); }
     }
 
-    // Edge: A --> B, A -->|label| B
-    const edgeMatch = line.match(/(\w+)\s*-->\s*(?:\|([^|]*)\|\s*)?(\w+)/);
+    // Edge: A --> B, A -->|label| B, A[...] --> B{...}
+    const edgeMatch = line.match(/(\w+)(?:\[.*?\]|\{.*?\}|\(.*?\))?\s*-->\s*(?:\|([^|]*)\|\s*)?(\w+)(?:\[.*?\]|\{.*?\}|\(.*?\))?/);
     if (edgeMatch) {
       const fromId = edgeMatch[1];
       const label = edgeMatch[2] || '';
@@ -247,8 +247,9 @@ function mdToHtml(md: string): string {
   const result: string[] = [];
   let inList = false;
   let listType: 'ul' | 'ol' = 'ul';
-  let nextRowIsHeader = false;
   let inTable = false;
+  let pendingTableRow: string | null = null;
+  let sawSeparator = false;
 
   for (const line of lines) {
     if (line.startsWith('<li')) {
@@ -263,17 +264,32 @@ function mdToHtml(md: string): string {
     } else {
       if (inList) { result.push(`</${listType}>`); inList = false; }
       if (line === '<tr-sep />') {
-        nextRowIsHeader = true;
+        sawSeparator = true;
+        // The previous <tr> row is the header - convert it
+        if (pendingTableRow !== null) {
+          result.push(pendingTableRow.replace(/<td>/g, '<th style="border:1px solid var(--color-outline-variant);padding:8px 12px;background:var(--color-surface);font-weight:600;text-align:left;">').replace(/<\/td>/g, '</th>') + '\n');
+          pendingTableRow = null;
+        }
       } else if (line.startsWith('<tr>')) {
         if (!inTable) { result.push('<table style="border-collapse:collapse;width:100%;margin:16px 0;">'); inTable = true; }
-        if (nextRowIsHeader) {
-          result.push(line.replace(/<td>/g, '<th style="border:1px solid var(--color-outline-variant);padding:8px 12px;background:var(--color-surface);font-weight:600;text-align:left;">').replace(/<\/td>/g, '</th>') + '\n');
-          nextRowIsHeader = false;
-        } else {
+        if (sawSeparator) {
+          // This is a data row after the separator
           result.push(line + '\n');
+        } else {
+          // Buffer this row - it might be the header
+          pendingTableRow = line;
         }
       } else {
-        if (inTable && !line.startsWith('<tr')) { result.push('</table>'); inTable = false; }
+        if (inTable && !line.startsWith('<tr')) {
+          // Flush any pending header row
+          if (pendingTableRow !== null) {
+            result.push(pendingTableRow + '\n');
+            pendingTableRow = null;
+          }
+          result.push('</table>');
+          inTable = false;
+          sawSeparator = false;
+        }
         if (line.trim() === '') {
           result.push('');
         } else if (line.startsWith('<h') || line.startsWith('<hr') || line.startsWith('<pre') || line.startsWith('<blockquote') || line.startsWith('<img') || line.startsWith('<div class="flowchart"')) {
@@ -284,6 +300,7 @@ function mdToHtml(md: string): string {
       }
     }
   }
+  if (pendingTableRow !== null) result.push(pendingTableRow + '\n');
   if (inList) result.push(`</${listType}>`);
   if (inTable) result.push('</table>');
 
@@ -291,6 +308,8 @@ function mdToHtml(md: string): string {
 }
 
 // --- Tool Module ---
+
+let mpDebounceTimer: ReturnType<typeof setTimeout>;
 
 export default {
   id: 'markdown-preview',
@@ -350,10 +369,9 @@ export default {
       output.innerHTML = mdToHtml(text);
     }
 
-    let debounceTimer: ReturnType<typeof setTimeout>;
     input.addEventListener('input', () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(doPreview, 200);
+      clearTimeout(mpDebounceTimer);
+      mpDebounceTimer = setTimeout(doPreview, 200);
     });
 
     // File drag-drop
@@ -384,4 +402,5 @@ export default {
       output.innerHTML = '<span style="color: var(--color-on-surface-variant); opacity: 0.5;">在左侧输入 Markdown 即可实时预览</span>';
     });
   },
+  destroy() { clearTimeout(mpDebounceTimer); },
 };
