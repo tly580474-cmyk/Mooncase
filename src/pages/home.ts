@@ -4,15 +4,15 @@ import { getRecentTools } from '../core/storage';
 import { navigate } from '../core/router';
 
 const categoryNames: Record<ToolCategory, string> = {
-  text: 'Text Tools',
-  image: 'Image Tools',
-  code: 'Code Tools',
-  conversion: 'Format Conversion',
-  encoding: 'Encoding & Decoding',
-  generator: 'Generators',
-  security: 'Security',
-  utility: 'Utility Tools',
-  network: 'Network Tools',
+  text: '文本工具',
+  image: '图片工具',
+  code: '代码工具',
+  conversion: '格式转换',
+  encoding: '编码解码',
+  generator: '生成器',
+  security: '安全工具',
+  utility: '实用工具',
+  network: '网络工具',
 };
 
 const categoryIcons: Record<ToolCategory, string> = {

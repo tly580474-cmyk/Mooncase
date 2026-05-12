@@ -411,6 +411,7 @@
 }
 
 .tool-select {
+  width: 100%;
   padding: 10px 14px;
   border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-md);
@@ -524,25 +525,25 @@
 }
 
 .diff-del {
-  background: #ffdad6;
+  background: var(--color-diff-del);
 }
 
 .diff-del .diff-text {
-  color: var(--color-on-error-container);
+  color: var(--color-diff-del-text);
 }
 
 .diff-add {
-  background: #d4edda;
+  background: var(--color-diff-add);
 }
 
 .diff-add .diff-text {
-  color: #0a5c36;
+  color: var(--color-diff-add-text);
 }
 
 .diff-mod {
-  background: #fff3cd;
+  background: var(--color-diff-mod);
 }
 
 .diff-mod .diff-text {
-  color: #664d03;
+  color: var(--color-diff-mod-text);
 }

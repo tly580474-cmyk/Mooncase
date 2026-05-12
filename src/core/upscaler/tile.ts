@@ -118,7 +118,7 @@ function padToSize(
   srcH: number,
   targetW: number,
   targetH: number,
-): Uint8ClampedArray {
+): Uint8ClampedArray<ArrayBuffer> {
   const rgba = new Uint8ClampedArray(targetW * targetH * 4);
   for (let y = 0; y < srcH; y++) {
     for (let x = 0; x < srcW; x++) {

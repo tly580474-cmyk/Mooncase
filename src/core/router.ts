@@ -51,14 +51,16 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'image-base64-code': () => import('../pages/tools/image-base64-code'),
   'svg-to-base64': () => import('../pages/tools/svg-to-base64'),
   'ascii-art': () => import('../pages/tools/ascii-art'),
-  // 格式转换
+  // 编码解码
   'base64': () => import('../pages/tools/base64'),
   'url-encode': () => import('../pages/tools/url-encode'),
-  // 编码解码
   'unicode': () => import('../pages/tools/unicode'),
   'base-x': () => import('../pages/tools/base-x'),
   'morse': () => import('../pages/tools/morse'),
   'jwt-decode': () => import('../pages/tools/jwt-decode'),
+  // 格式转换
+  'image-convert': () => import('../pages/tools/image-convert'),
+  'data-convert': () => import('../pages/tools/data-convert'),
   // 生成器
   'password-gen': () => import('../pages/tools/password-gen'),
   'uuid-gen': () => import('../pages/tools/uuid-gen'),
@@ -87,6 +89,11 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'dns-query': () => import('../pages/tools/dns-query'),
   'find-ping': () => import('../pages/tools/find-ping'),
   'localhost-net': () => import('../pages/tools/localhost-net'),
+  // 视频工具
+  'video-convert': () => import('../pages/tools/video-convert'),
+  'video-to-gif': () => import('../pages/tools/video-to-gif'),
+  'video-to-mp3': () => import('../pages/tools/video-to-mp3'),
+  'video-compress': () => import('../pages/tools/video-compress'),
 };
 
 function getToolId(): string {

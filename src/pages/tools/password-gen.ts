@@ -16,9 +16,9 @@ function calcStrength(len: number, opts: Record<string, boolean>): { label: stri
   const pool = (opts.lower ? 26 : 0) + (opts.upper ? 26 : 0) + (opts.digits ? 10 : 0) + (opts.symbols ? 24 : 0);
   const entropy = Math.floor(len * Math.log2(Math.max(pool, 1)));
   if (entropy < 40) return { label: '弱', color: 'var(--color-error)', width: '25%' };
-  if (entropy < 60) return { label: '中', color: '#f59e0b', width: '50%' };
-  if (entropy < 80) return { label: '强', color: '#22c55e', width: '75%' };
-  return { label: '极强', color: '#0ea5e9', width: '100%' };
+  if (entropy < 60) return { label: '中', color: 'var(--color-primary)', width: '50%' };
+  if (entropy < 80) return { label: '强', color: 'var(--color-success)', width: '75%' };
+  return { label: '极强', color: 'var(--color-primary-fixed-dim)', width: '100%' };
 }
 
 export default {

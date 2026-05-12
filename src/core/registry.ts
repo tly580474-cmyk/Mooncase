@@ -207,7 +207,7 @@ const registry: ToolMeta[] = [
     id: 'qr-code',
     name: '二维码生成',
     icon: 'qr_code_2',
-    category: 'utility',
+    category: 'generator',
     description: '将文本转换为二维码',
     tags: ['qr', '二维码', '生成'],
   },
@@ -323,6 +323,23 @@ const registry: ToolMeta[] = [
     description: '查看本地网络信息',
     tags: ['localhost', '本地', '网络', '局域网'],
   },
+  // 格式转换
+  {
+    id: 'image-convert',
+    name: '图片格式转换',
+    icon: 'convert',
+    category: 'conversion',
+    description: 'JPG/PNG/WebP/BMP/GIF 图片格式互转',
+    tags: ['image', 'convert', '图片', '格式', '转换', 'jpg', 'png', 'webp'],
+  },
+  {
+    id: 'data-convert',
+    name: '数据格式转换',
+    icon: 'file_type',
+    category: 'conversion',
+    description: 'CSV/JSON/XML 数据格式互转',
+    tags: ['data', 'convert', '数据', '格式', '转换', 'csv', 'json', 'xml'],
+  },
   // 图片工具
   {
     id: 'image-compress',
@@ -412,6 +429,39 @@ const registry: ToolMeta[] = [
     category: 'security',
     description: '使用密钥生成 HMAC 签名',
     tags: ['hmac', '签名', '安全', '密钥'],
+  },
+  // 视频工具
+  {
+    id: 'video-convert',
+    name: '视频格式转换',
+    icon: 'convert',
+    category: 'conversion',
+    description: 'MP4/MOV/AVI/MKV/FLV/WMV 视频格式互转',
+    tags: ['video', 'convert', '视频', '格式', '转换', 'mp4', 'mov', 'avi', 'mkv'],
+  },
+  {
+    id: 'video-to-gif',
+    name: '视频转GIF',
+    icon: 'film',
+    category: 'conversion',
+    description: '将视频片段转换为 GIF 动图',
+    tags: ['video', 'gif', '视频', '动图', '转换'],
+  },
+  {
+    id: 'video-to-mp3',
+    name: '视频转MP3',
+    icon: 'music',
+    category: 'conversion',
+    description: '从视频中提取音频为 MP3 文件',
+    tags: ['video', 'mp3', '音频', '提取', '视频'],
+  },
+  {
+    id: 'video-compress',
+    name: '视频压缩',
+    icon: 'zap',
+    category: 'conversion',
+    description: '压缩视频文件大小，支持 4K/高清',
+    tags: ['video', 'compress', '压缩', '视频', '4k', '高清'],
   },
 ];
 

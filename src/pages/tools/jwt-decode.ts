@@ -35,8 +35,8 @@ export default {
             <textarea id="jwt-input" class="tool-textarea" rows="4" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"></textarea>
           </div>
 
-          <div id="jwt-error" style="display: none; padding: 12px 16px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); margin-bottom: 16px;">
-            <span id="jwt-error-text" style="color: #ef4444; font: var(--text-body-sm);"></span>
+          <div id="jwt-error" style="display: none; padding: 12px 16px; background: var(--color-error-container); border: 1px solid var(--color-error); border-radius: var(--radius-md); margin-bottom: 16px;">
+            <span id="jwt-error-text" style="color: var(--color-error); font: var(--text-body-sm);"></span>
           </div>
 
           <div id="jwt-result" style="display: none;">

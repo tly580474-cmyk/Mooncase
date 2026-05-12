@@ -68,7 +68,7 @@ export default {
     container.innerHTML = `
       <div class="content">
         <div class="tool-page-header">
-          <a href="#/utility" class="tool-page-back">${icon('build')} 实用工具</a>
+          <a href="#/generator" class="tool-page-back">${icon('password')} 生成器</a>
           <h1 style="font: var(--text-headline-md);">二维码生成</h1>
           <p style="font: var(--text-body-md); color: var(--color-on-surface-variant);">将文本转换为二维码</p>
         </div>

@@ -76,7 +76,7 @@ function highlightCode(code: string, lang: string): string {
     const re = new RegExp(escapedSingle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '.*', 'g');
     let m;
     while ((m = re.exec(escaped)) !== null) {
-      tokens.push({ start: m.index, end: m.index + m[0].length, html: `<span style="color:#9e9e9e;font-style:italic">${m[0]}</span>`, priority: 1 });
+      tokens.push({ start: m.index, end: m.index + m[0].length, html: `<span style="color:var(--color-syntax-comment);font-style:italic">${m[0]}</span>`, priority: 1 });
     }
   }
   for (const [open, close] of def.commentMulti) {
@@ -85,7 +85,7 @@ function highlightCode(code: string, lang: string): string {
     const re = new RegExp(escapedOpen.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\S]*?' + escapedClose.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
     let m;
     while ((m = re.exec(escaped)) !== null) {
-      tokens.push({ start: m.index, end: m.index + m[0].length, html: `<span style="color:#9e9e9e;font-style:italic">${m[0]}</span>`, priority: 1 });
+      tokens.push({ start: m.index, end: m.index + m[0].length, html: `<span style="color:var(--color-syntax-comment);font-style:italic">${m[0]}</span>`, priority: 1 });
     }
   }
 
@@ -94,19 +94,19 @@ function highlightCode(code: string, lang: string): string {
     const re = new RegExp(escapedQ + '[^' + escapedQ + '\\\\]*(?:\\\\.[^' + escapedQ + '\\\\]*)*' + escapedQ, 'g');
     let m;
     while ((m = re.exec(escaped)) !== null) {
-      tokens.push({ start: m.index, end: m.index + m[0].length, html: `<span style="color:#2e7d32">${m[0]}</span>`, priority: 2 });
+      tokens.push({ start: m.index, end: m.index + m[0].length, html: `<span style="color:var(--color-syntax-string)">${m[0]}</span>`, priority: 2 });
     }
   }
 
   const kwPattern = new RegExp('\\b(' + def.keywords.join('|') + ')\\b', 'g');
   let m;
   while ((m = kwPattern.exec(escaped)) !== null) {
-    tokens.push({ start: m.index, end: m.index + m[0].length, html: `<span style="color:#c62828;font-weight:600">${m[0]}</span>`, priority: 3 });
+    tokens.push({ start: m.index, end: m.index + m[0].length, html: `<span style="color:var(--color-syntax-keyword);font-weight:600">${m[0]}</span>`, priority: 3 });
   }
 
   const numRe = /\b(\d+\.?\d*(?:[eE][+-]?\d+)?)\b/g;
   while ((m = numRe.exec(escaped)) !== null) {
-    tokens.push({ start: m.index, end: m.index + m[0].length, html: `<span style="color:#e65100">${m[0]}</span>`, priority: 4 });
+    tokens.push({ start: m.index, end: m.index + m[0].length, html: `<span style="color:var(--color-syntax-number)">${m[0]}</span>`, priority: 4 });
   }
 
   tokens.sort((a, b) => a.start - b.start || a.priority - b.priority);

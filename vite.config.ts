@@ -27,7 +27,7 @@ export default defineConfig({
     headers: coepHeaders,
   },
   optimizeDeps: {
-    exclude: ['onnxruntime-web'],
+    exclude: ['onnxruntime-web', '@ffmpeg/ffmpeg', '@ffmpeg/util'],
   },
   plugins: [
     {
@@ -35,8 +35,7 @@ export default defineConfig({
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
           if (req.url?.startsWith('/ort/')) {
-            // Redirect to node_modules
-            const filePath = resolve(__dirname, 'node_modules', 'onnxruntime-web', 'dist', req.url.replace('/ort/', ''));
+            const filePath = resolve(__dirname, 'node_modules', 'onnxruntime-web', 'dist', req.url.replace('/ort/', '')).replace(/\\/g, '/');
             req.url = `/@fs/${filePath}`;
           }
           next();

@@ -42,7 +42,7 @@ export default {
         const obj = JSON.parse(input.value);
         output.value = JSON.stringify(obj, null, 2);
         status.textContent = '✓ 有效 JSON';
-        status.style.color = '#22c55e';
+        status.style.color = 'var(--color-success)';
       } catch (e: any) {
         status.textContent = `✗ ${e.message}`;
         status.style.color = 'var(--color-error)';
@@ -54,7 +54,7 @@ export default {
         const obj = JSON.parse(input.value);
         output.value = JSON.stringify(obj);
         status.textContent = '✓ 已压缩';
-        status.style.color = '#22c55e';
+        status.style.color = 'var(--color-success)';
       } catch (e: any) {
         status.textContent = `✗ ${e.message}`;
         status.style.color = 'var(--color-error)';
@@ -65,7 +65,7 @@ export default {
       try {
         JSON.parse(input.value);
         status.textContent = '✓ JSON 格式正确';
-        status.style.color = '#22c55e';
+        status.style.color = 'var(--color-success)';
       } catch (e: any) {
         status.textContent = `✗ ${e.message}`;
         status.style.color = 'var(--color-error)';
