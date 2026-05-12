@@ -108,6 +108,50 @@ function cropImageData(imageData: ImageData, targetW: number, targetH: number): 
   return new ImageData(rgba, targetW, targetH);
 }
 
+function getModelInputSize(scale: number): number {
+  return scale === 4 ? 128 : 0;
+}
+
+function padToSize(
+  data: Uint8ClampedArray,
+  srcW: number,
+  srcH: number,
+  targetW: number,
+  targetH: number,
+): Uint8ClampedArray {
+  const rgba = new Uint8ClampedArray(targetW * targetH * 4);
+  for (let y = 0; y < srcH; y++) {
+    for (let x = 0; x < srcW; x++) {
+      const si = (y * srcW + x) * 4;
+      const di = (y * targetW + x) * 4;
+      rgba[di] = data[si];
+      rgba[di + 1] = data[si + 1];
+      rgba[di + 2] = data[si + 2];
+      rgba[di + 3] = data[si + 3];
+    }
+  }
+  // Edge-fill right
+  for (let y = 0; y < srcH; y++) {
+    for (let x = srcW; x < targetW; x++) {
+      const si = (y * srcW + (srcW - 1)) * 4;
+      const di = (y * targetW + x) * 4;
+      rgba[di] = data[si]; rgba[di + 1] = data[si + 1];
+      rgba[di + 2] = data[si + 2]; rgba[di + 3] = data[si + 3];
+    }
+  }
+  // Edge-fill bottom
+  for (let y = srcH; y < targetH; y++) {
+    for (let x = 0; x < targetW; x++) {
+      const srcX = Math.min(x, srcW - 1);
+      const si = ((srcH - 1) * srcW + srcX) * 4;
+      const di = (y * targetW + x) * 4;
+      rgba[di] = data[si]; rgba[di + 1] = data[si + 1];
+      rgba[di + 2] = data[si + 2]; rgba[di + 3] = data[si + 3];
+    }
+  }
+  return rgba;
+}
+
 function padImageData(
   imageData: ImageData,
   scale: number,
@@ -120,43 +164,10 @@ function padImageData(
     return { padded: imageData, origW: imgW, origH: imgH };
   }
 
-  const rgba = new Uint8ClampedArray(padW * padH * 4);
-  const src = imageData.data;
-  for (let y = 0; y < imgH; y++) {
-    for (let x = 0; x < imgW; x++) {
-      const si = (y * imgW + x) * 4;
-      const di = (y * padW + x) * 4;
-      rgba[di] = src[si];
-      rgba[di + 1] = src[si + 1];
-      rgba[di + 2] = src[si + 2];
-      rgba[di + 3] = src[si + 3];
-    }
-  }
-  // Edge-fill: extend right edge
-  for (let y = 0; y < imgH; y++) {
-    for (let x = imgW; x < padW; x++) {
-      const si = (y * imgW + (imgW - 1)) * 4;
-      const di = (y * padW + x) * 4;
-      rgba[di] = src[si];
-      rgba[di + 1] = src[si + 1];
-      rgba[di + 2] = src[si + 2];
-      rgba[di + 3] = src[si + 3];
-    }
-  }
-  // Edge-fill: extend bottom edge
-  for (let y = imgH; y < padH; y++) {
-    for (let x = 0; x < padW; x++) {
-      const srcX = Math.min(x, imgW - 1);
-      const si = ((imgH - 1) * imgW + srcX) * 4;
-      const di = (y * padW + x) * 4;
-      rgba[di] = src[si];
-      rgba[di + 1] = src[si + 1];
-      rgba[di + 2] = src[si + 2];
-      rgba[di + 3] = src[si + 3];
-    }
-  }
-
-  return { padded: new ImageData(rgba, padW, padH), origW: imgW, origH: imgH };
+  return {
+    padded: new ImageData(padToSize(imageData.data, imgW, imgH, padW, padH), padW, padH),
+    origW: imgW, origH: imgH,
+  };
 }
 
 export async function processWithTiling(
@@ -171,10 +182,25 @@ export async function processWithTiling(
   const overlap = options.overlap ?? 16;
   const tileSize = options.tileSize ?? getOptimalTileSize(scale, imgW, imgH);
 
+  const modelInputSize = getModelInputSize(scale);
+
+  // For fixed-size models, constrain tile size so padded tiles fit within model input
+  const effectiveTileSize = modelInputSize > 0
+    ? Math.min(tileSize, modelInputSize - overlap * 2)
+    : tileSize;
+
   // If image is small enough, process without tiling
-  if (imgW <= tileSize && imgH <= tileSize) {
+  if (imgW <= effectiveTileSize && imgH <= effectiveTileSize) {
     options.onProgress?.({ phase: 'preprocessing', detail: '处理中...', percent: 0 });
-    const { tensor, alpha } = imageToTensor(ort, imgData, imgW, imgH);
+
+    // For fixed-size models, pad to model input size
+    const inferW = modelInputSize > 0 ? Math.max(imgW, modelInputSize) : imgW;
+    const inferH = modelInputSize > 0 ? Math.max(imgH, modelInputSize) : imgH;
+    const inferData = (inferW === imgW && inferH === imgH)
+      ? imgData
+      : padToSize(imgData, imgW, imgH, inferW, inferH);
+
+    const { tensor, alpha } = imageToTensor(ort, inferData, inferW, inferH);
     const feeds: Record<string, any> = {};
     const inputNames = session.inputNames || ['input'];
     feeds[inputNames[0]] = tensor;
@@ -183,19 +209,19 @@ export async function processWithTiling(
     const results = await session.run(feeds);
     const outputTensor = results[Object.keys(results)[0]];
     const outData = outputTensor.data as Float32Array;
-    const outW = imgW * scale;
-    const outH = imgH * scale;
 
-    const result = tensorToImageData(outData, outW, outH, alpha, imgW, imgH);
+    const result = tensorToImageData(outData, inferW * scale, inferH * scale, alpha, inferW, inferH);
     tensor.dispose?.();
     outputTensor.dispose?.();
 
+    // Crop to actual image output size (remove model padding)
+    const cropped = cropImageData(result, imgW * scale, imgH * scale);
     options.onProgress?.({ phase: 'done', detail: '完成', percent: 100 });
-    return cropImageData(result, origW * scale, origH * scale);
+    return cropImageData(cropped, origW * scale, origH * scale);
   }
 
   // Tiled processing
-  const tiles = computeTiles(imgW, imgH, tileSize, overlap);
+  const tiles = computeTiles(imgW, imgH, effectiveTileSize, overlap);
   const outW = imgW * scale;
   const outH = imgH * scale;
 
@@ -238,7 +264,14 @@ export async function processWithTiling(
       }
     }
 
-    const { tensor, alpha } = imageToTensor(ort, tileData, tile.padW, tile.padH);
+    // For fixed-size models, pad tile to model input size
+    const inferW = modelInputSize > 0 ? Math.max(tile.padW, modelInputSize) : tile.padW;
+    const inferH = modelInputSize > 0 ? Math.max(tile.padH, modelInputSize) : tile.padH;
+    const inferData = (inferW === tile.padW && inferH === tile.padH)
+      ? tileData
+      : padToSize(tileData, tile.padW, tile.padH, inferW, inferH);
+
+    const { tensor, alpha } = imageToTensor(ort, inferData, inferW, inferH);
     const feeds: Record<string, any> = {};
     feeds[inputNames[0]] = tensor;
 
@@ -249,8 +282,9 @@ export async function processWithTiling(
     const tileOutW = tile.padW * scale;
     const tileOutH = tile.padH * scale;
 
-    // Convert tile output to ImageData
-    const tileResult = tensorToImageData(outData, tileOutW, tileOutH, alpha, tile.padW, tile.padH);
+    // Convert tile output to ImageData (using inference dimensions, then crop to tile)
+    const fullResult = tensorToImageData(outData, inferW * scale, inferH * scale, alpha, inferW, inferH);
+    const tileResult = cropImageData(fullResult, tileOutW, tileOutH);
 
     // Compute the region in the output image that this tile covers
     const outX = tile.srcX * scale;
