@@ -1,5 +1,5 @@
 import { icon } from '../../core/icons';
-import type { ScaleFactor, InferenceBackend, UpscaleMode, UpscaleProgress } from '../../core/upscaler/types';
+import type { ScaleFactor, InferenceBackend, UpscaleProgress } from '../../core/upscaler/types';
 
 let activeAbortController: AbortController | null = null;
 
@@ -26,20 +26,6 @@ export default {
           </div>
 
           <div id="up-controls" style="display: none;">
-            <div class="tool-field" id="up-mode-field">
-              <label class="tool-label">放大模式</label>
-              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                <label style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px solid var(--color-outline-variant); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);">
-                  <input type="radio" name="up-mode" value="real-esrgan" checked style="accent-color: var(--color-primary);" />
-                  <span>Real-ESRGAN <small style="color: var(--color-on-surface-variant);">(通用)</small></span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px solid var(--color-outline-variant); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition-fast);">
-                  <input type="radio" name="up-mode" value="anime4k" style="accent-color: var(--color-primary);" />
-                  <span>Anime4K+ <small style="color: var(--color-on-surface-variant);">(线条画)</small></span>
-                </label>
-              </div>
-            </div>
-
             <div style="display: flex; flex-wrap: wrap; gap: 16px;">
               <div class="tool-field" style="flex: 1; min-width: 120px;">
                 <label class="tool-label">放大倍数</label>
@@ -145,10 +131,13 @@ export default {
 
     let currentFile: File | null = null;
     let currentUrl: string | null = null;
+    let currentOrigUrl: string | null = null;
     let resultBlob: Blob | null = null;
+    let resultUrl: string | null = null;
 
     function showFile(file: File) {
       if (currentUrl) URL.revokeObjectURL(currentUrl);
+      if (currentOrigUrl) { URL.revokeObjectURL(currentOrigUrl); currentOrigUrl = null; }
       currentFile = file;
       currentUrl = URL.createObjectURL(file);
       preview.onload = () => {
@@ -204,20 +193,10 @@ export default {
       } catch {}
     })();
 
-    // Mode toggle: hide backend selector when Anime4K+ is selected
-    const backendField = container.querySelector('#up-backend')?.closest('.tool-field') as HTMLElement | null;
-    container.querySelectorAll('input[name="up-mode"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        const mode = (container.querySelector('input[name="up-mode"]:checked') as HTMLInputElement).value;
-        if (backendField) backendField.style.display = mode === 'anime4k' ? 'none' : '';
-      }, { signal });
-    });
-
     // Start upscale
     container.querySelector('#up-start')!.addEventListener('click', async () => {
       if (!currentFile) return;
 
-      const mode = (container.querySelector('input[name="up-mode"]:checked') as HTMLInputElement).value as UpscaleMode;
       const scale = parseInt((container.querySelector('input[name="up-scale"]:checked') as HTMLInputElement).value) as ScaleFactor;
       const backend = (container.querySelector('#up-backend') as HTMLSelectElement).value as InferenceBackend;
       const startBtn = container.querySelector('#up-start') as HTMLButtonElement;
@@ -265,7 +244,7 @@ export default {
           }
         };
 
-        const result = await runUpscale(srcData, { scale, backend, mode, onProgress });
+        const result = await runUpscale(srcData, { scale, backend, onProgress });
 
         // Convert result to canvas and blob
         const resultCanvas = document.createElement('canvas');
@@ -273,29 +252,38 @@ export default {
         resultCanvas.height = result.height;
         resultCanvas.getContext('2d')!.putImageData(result, 0, 0);
 
-        resultCanvas.toBlob((blob) => {
-          if (!blob) return;
-          resultBlob = blob;
+        try {
+          resultCanvas.toBlob((blob) => {
+            if (!blob) return;
+            resultBlob = blob;
 
-          // Set up comparison
-          const beforeImg = container.querySelector('#up-before') as HTMLImageElement;
-          const afterImg = container.querySelector('#up-after') as HTMLImageElement;
+            // Set up comparison
+            const beforeImg = container.querySelector('#up-before') as HTMLImageElement;
+            const afterImg = container.querySelector('#up-after') as HTMLImageElement;
 
-          const origUrl = URL.createObjectURL(currentFile!);
-          const resultUrl = URL.createObjectURL(blob);
+            if (currentOrigUrl) URL.revokeObjectURL(currentOrigUrl);
+            currentOrigUrl = URL.createObjectURL(currentFile!);
+            if (resultUrl) URL.revokeObjectURL(resultUrl);
+            resultUrl = URL.createObjectURL(blob);
 
-          beforeImg.src = origUrl;
-          afterImg.src = resultUrl;
+            beforeImg.src = currentOrigUrl;
+            afterImg.src = resultUrl;
 
-          container.querySelector('#up-orig-size')!.textContent = `${srcImg.width} × ${srcImg.height}`;
-          container.querySelector('#up-result-size')!.textContent = `${result.width} × ${result.height}`;
+            container.querySelector('#up-orig-size')!.textContent = `${srcImg.width} × ${srcImg.height}`;
+            container.querySelector('#up-result-size')!.textContent = `${result.width} × ${result.height}`;
 
-          resultArea.style.display = 'block';
-          setupCompareSlider();
+            progressArea.style.display = 'none';
+            resultArea.style.display = 'block';
+            setupCompareSlider();
 
-          // Cleanup
-          setTimeout(() => { URL.revokeObjectURL(origUrl); }, 1000);
-        }, 'image/png');
+            // Cleanup blob URL after image loads
+            setTimeout(() => {
+              if (currentOrigUrl) { URL.revokeObjectURL(currentOrigUrl); currentOrigUrl = null; }
+            }, 1000);
+          }, 'image/png');
+        } catch {
+          throw new Error('图片处理失败，可能是安全限制导致');
+        }
 
       } catch (err: any) {
         errorArea.style.display = 'block';
@@ -321,6 +309,14 @@ export default {
       progressArea.style.display = 'none';
       errorArea.style.display = 'none';
       resultBlob = null;
+      if (resultUrl) {
+        URL.revokeObjectURL(resultUrl);
+        resultUrl = null;
+      }
+      if (currentOrigUrl) {
+        URL.revokeObjectURL(currentOrigUrl);
+        currentOrigUrl = null;
+      }
     }, { signal });
 
     // Compare slider
@@ -352,5 +348,6 @@ export default {
       activeAbortController.abort();
       activeAbortController = null;
     }
+    import('../../core/upscaler/engine').then(({ disposeEngine }) => disposeEngine());
   },
 };

@@ -87,6 +87,7 @@ export async function detectBackends(): Promise<InferenceBackend[]> {
 let ortModule: any = null;
 let currentSession: any = null;
 let currentModelKey = '';
+let engineBusy = false;
 
 async function getOrt() {
   if (!ortModule) {
@@ -183,16 +184,9 @@ export async function runUpscale(
   imageData: ImageData,
   options: UpscaleOptions,
 ): Promise<ImageData> {
-  if (options.mode === 'anime4k') {
-    const { runAnime4kUpscale } = await import('./anime4k');
-    return runAnime4kUpscale(imageData, {
-      scale: options.scale,
-      sharpenStrength: options.sharpenStrength,
-      contrastLevel: options.contrastLevel,
-      onProgress: options.onProgress,
-    });
-  }
-
+  if (engineBusy) throw new Error('引擎正忙，请等待当前任务完成');
+  engineBusy = true;
+  try {
   const modelKey = `${options.scale}x`;
 
   if (currentModelKey !== modelKey || !currentSession) {
@@ -210,6 +204,9 @@ export async function runUpscale(
   const ort = await getOrt();
   const { processWithTiling } = await import('./tile');
   return processWithTiling(currentSession, ort, imageData, options);
+  } finally {
+    engineBusy = false;
+  }
 }
 
 export function disposeEngine() {
@@ -218,4 +215,5 @@ export function disposeEngine() {
     currentSession = null;
     currentModelKey = '';
   }
+  engineBusy = false;
 }

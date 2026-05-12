@@ -3,6 +3,7 @@ export type ToolCategory =
   | 'image'
   | 'code'
   | 'conversion'
+  | 'encoding'
   | 'generator'
   | 'security'
   | 'utility'
@@ -174,7 +175,7 @@ const registry: ToolMeta[] = [
     id: 'base64',
     name: 'Base64 编码',
     icon: 'code',
-    category: 'conversion',
+    category: 'encoding',
     description: '文本与 Base64 互转',
     tags: ['base64', '编码', '解码', '转换'],
   },
@@ -182,9 +183,41 @@ const registry: ToolMeta[] = [
     id: 'url-encode',
     name: 'URL 编码',
     icon: 'link',
-    category: 'conversion',
+    category: 'encoding',
     description: 'URL 编码与解码',
     tags: ['url', '编码', '解码', 'encode'],
+  },
+  {
+    id: 'unicode',
+    name: 'Unicode 编解码器',
+    icon: 'text_fields',
+    category: 'encoding',
+    description: '文本与 Unicode 转义序列互转',
+    tags: ['unicode', '编码', '解码', '转义', '\\u'],
+  },
+  {
+    id: 'base-x',
+    name: 'BaseX 编解码器',
+    icon: 'binary',
+    category: 'encoding',
+    description: '支持 Base32 / Base58 / Base62 编解码',
+    tags: ['base32', 'base58', 'base62', '编码', '解码'],
+  },
+  {
+    id: 'morse',
+    name: '摩斯密码转换器',
+    icon: 'morse',
+    category: 'encoding',
+    description: '文本与摩斯密码互转',
+    tags: ['morse', '摩斯', '密码', '电报'],
+  },
+  {
+    id: 'jwt-decode',
+    name: 'JWT 解码器',
+    icon: 'key',
+    category: 'encoding',
+    description: '解码 JWT Token 查看 Header 和 Payload',
+    tags: ['jwt', 'token', '解码', 'json web token'],
   },
   {
     id: 'ip-query',
@@ -264,8 +297,8 @@ const registry: ToolMeta[] = [
     name: 'AI图片超分辨率',
     icon: 'wand',
     category: 'image',
-    description: '基于 Real-CUGAN 的 AI 图片无损放大，支持 2X/4X',
-    tags: ['image', 'upscale', 'super resolution', '超分', '放大', 'AI', '高清', '图片', 'realcugan'],
+    description: '基于 Real-ESRGAN 的 AI 图片无损放大，支持 2X/4X',
+    tags: ['image', 'upscale', 'super resolution', '超分', '放大', 'AI', '高清', '图片', 'realesrgan'],
   },
   // 安全工具
   {

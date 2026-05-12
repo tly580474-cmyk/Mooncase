@@ -1,22 +1,11 @@
 export type ScaleFactor = 2 | 4;
 export type InferenceBackend = 'webgpu' | 'webgl' | 'wasm';
-export type UpscaleMode = 'real-esrgan' | 'anime4k';
 
 export interface UpscaleOptions {
   scale: ScaleFactor;
   backend: InferenceBackend;
-  mode?: UpscaleMode;
   tileSize?: number;
   overlap?: number;
-  sharpenStrength?: number;
-  contrastLevel?: number;
-  onProgress?: (p: UpscaleProgress) => void;
-}
-
-export interface Anime4kOptions {
-  scale: ScaleFactor;
-  sharpenStrength?: number;
-  contrastLevel?: number;
   onProgress?: (p: UpscaleProgress) => void;
 }
 
