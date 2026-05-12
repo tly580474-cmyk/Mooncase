@@ -54,6 +54,12 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'image-compress': () => import('../pages/tools/image-compress'),
   'image-crop': () => import('../pages/tools/image-crop'),
   'image-base64': () => import('../pages/tools/image-base64'),
+  'image-to-pdf': () => import('../pages/tools/image-to-pdf'),
+  'gif-maker': () => import('../pages/tools/gif-maker'),
+  'animated-avatar': () => import('../pages/tools/animated-avatar'),
+  'image-color-picker': () => import('../pages/tools/image-color-picker'),
+  'ocr-extract': () => import('../pages/tools/ocr-extract'),
+  'image-upscale': () => import('../pages/tools/image-upscale'),
   // 安全工具
   'hash-gen': () => import('../pages/tools/hash-gen'),
   'hmac-gen': () => import('../pages/tools/hmac-gen'),

@@ -4,6 +4,9 @@ node_modules/
 # Build output
 dist/
 
+# ONNX Runtime WASM files (copied from node_modules during build)
+public/ort/
+
 # IDE
 .vscode/
 .idea/
