@@ -7,8 +7,10 @@ let ffmpegReady = false;
 let loadError: string | null = null;
 
 const LOAD_TIMEOUT_MS = 60000;
+const EXEC_TIMEOUT_MS = 600000; // 10 分钟执行超时
 
 const ST_BASE = '/ffmpeg/core';
+const MT_BASE = '/ffmpeg/core-mt';
 
 async function fetchBlobUrls(base: string, needsWorker: boolean) {
   const coreURL = await toBlobURL(`${base}/ffmpeg-core.js`, 'text/javascript');
@@ -17,6 +19,21 @@ async function fetchBlobUrls(base: string, needsWorker: boolean) {
     ? await toBlobURL(`${base}/ffmpeg-core.worker.js`, 'text/javascript')
     : undefined;
   return { coreURL, wasmURL, workerURL };
+}
+
+function isMultithreadSupported(): boolean {
+  try {
+    return (
+      typeof SharedArrayBuffer !== 'undefined' &&
+      self.crossOriginIsolated === true
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function getThreadMode(): string {
+  return isMultithreadSupported() ? '多线程 (MT)' : '单线程 (ST)';
 }
 
 export async function getFFmpeg(onLog?: (msg: string) => void, onProgress?: (p: number) => void): Promise<FFmpeg> {
@@ -47,15 +64,33 @@ export async function getFFmpeg(onLog?: (msg: string) => void, onProgress?: (p: 
 
     const loadSequence = (async () => {
       const { FFmpeg: FFmpegClass } = await import('@ffmpeg/ffmpeg');
+
+      // 先尝试 MT 核心
+      if (isMultithreadSupported()) {
+        try {
+          const ffmpeg = new FFmpegClass();
+          if (onLog) ffmpeg.on('log', ({ message }: { message: string }) => onLog(message));
+          if (onProgress) ffmpeg.on('progress', ({ progress }: { progress: number }) => onProgress(progress));
+
+          const { coreURL, wasmURL, workerURL } = await fetchBlobUrls(MT_BASE, true);
+          await ffmpeg.load({ coreURL, wasmURL, workerURL });
+
+          console.log('[FFmpeg] 多线程核心加载成功');
+          return ffmpeg;
+        } catch (mtError) {
+          console.warn('[FFmpeg] 多线程核心加载失败，降级到单线程核心:', mtError);
+        }
+      }
+
+      // 降级到 ST 核心
       const ffmpeg = new FFmpegClass();
       if (onLog) ffmpeg.on('log', ({ message }: { message: string }) => onLog(message));
       if (onProgress) ffmpeg.on('progress', ({ progress }: { progress: number }) => onProgress(progress));
 
-      // 使用单线程核心（ST），避免 MT 核心的 pthread worker 创建失败导致编码卡死
       const { coreURL, wasmURL } = await fetchBlobUrls(ST_BASE, false);
-
       await ffmpeg.load({ coreURL, wasmURL });
 
+      console.log('[FFmpeg] 单线程核心加载成功');
       return ffmpeg;
     })();
 
@@ -67,7 +102,7 @@ export async function getFFmpeg(onLog?: (msg: string) => void, onProgress?: (p: 
   } catch (e: any) {
     const msg: string = e?.message || '';
     if (msg.includes('SharedArrayBuffer') || msg.includes('bad memory')) {
-      loadError = '浏览器不支持 SharedArrayBuffer，请确认页面已启用跨域隔离（COOP/COEP 头）';
+      loadError = '浏览器不支持 SharedArrayBuffer，多线程降级失败。请确认页面已启用跨域隔离（COOP/COEP 头）';
     } else if (!msg) {
       loadError = 'FFmpeg 加载失败，请刷新页面重试';
     } else {
@@ -111,4 +146,24 @@ export function downloadBlob(blob: Blob, filename: string) {
   a.download = filename;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export async function execWithTimeout(ffmpeg: FFmpeg, args: string[], timeoutMs = EXEC_TIMEOUT_MS): Promise<void> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`编码超时（${Math.round(timeoutMs / 1000)}秒）。浏览器环境内存有限，建议：\n1. 降低分辨率\n2. 使用更小的源文件\n3. 换用桌面端 FFmpeg`)), timeoutMs);
+  });
+  try {
+    await Promise.race([ffmpeg.exec(args), timeout]);
+  } finally {
+    clearTimeout(timer!);
+  }
+}
+
+export function getLargeFileWarning(file: File): string | null {
+  const sizeMB = file.size / 1048576;
+  if (sizeMB > 500) {
+    return `文件较大 (${formatSize(file.size)})，浏览器内存有限，处理可能缓慢或失败。建议降低分辨率后再处理。`;
+  }
+  return null;
 }

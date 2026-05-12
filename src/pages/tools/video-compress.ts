@@ -1,5 +1,5 @@
 import { icon } from '../../core/icons';
-import { getFFmpeg, terminateFFmpeg, formatSize, validateFileSize, downloadBlob } from '../../core/ffmpeg-utils';
+import { getFFmpeg, terminateFFmpeg, formatSize, validateFileSize, downloadBlob, execWithTimeout, getLargeFileWarning } from '../../core/ffmpeg-utils';
 
 const PRESETS = [
   { value: '32', label: '极小体积', desc: 'CRF 32 — 文件最小，画质较低' },
@@ -125,9 +125,12 @@ export default {
       const err = validateFileSize(file);
       if (err) { fileInfo.style.display = ''; fileInfo.textContent = err; fileInfo.style.color = 'var(--color-error)'; return; }
       inputFile = file;
+      const warn = getLargeFileWarning(file);
       fileInfo.style.display = '';
-      fileInfo.textContent = `${file.name} (${formatSize(file.size)})`;
-      fileInfo.style.color = '';
+      fileInfo.textContent = warn
+        ? `${file.name} (${formatSize(file.size)}) — ${warn}`
+        : `${file.name} (${formatSize(file.size)})`;
+      fileInfo.style.color = warn ? 'var(--color-warning)' : '';
       resultDiv.style.display = 'none';
     }
 
@@ -159,12 +162,12 @@ export default {
         await ffmpeg.writeFile(inputName, inputData);
 
         statusEl.textContent = '压缩中...';
-        const args = ['-i', inputName, '-c:v', 'libx264', '-crf', crf, '-preset', 'medium', '-c:a', 'aac', '-b:a', '128k'];
+        const args = ['-i', inputName, '-c:v', 'libx264', '-crf', crf, '-preset', 'medium', '-c:a', 'aac', '-b:a', '128k', '-threads', '0'];
         if (resolution !== '0') {
           args.push('-vf', `scale=-2:${resolution}`);
         }
         args.push('-y', 'output.mp4');
-        await ffmpeg.exec(args);
+        await execWithTimeout(ffmpeg, args);
 
         const data = await ffmpeg.readFile('output.mp4');
         outputBlob = new Blob([(data as Uint8Array).buffer as ArrayBuffer], { type: 'video/mp4' });

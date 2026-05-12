@@ -1,5 +1,5 @@
 import { icon } from '../../core/icons';
-import { getFFmpeg, terminateFFmpeg, formatSize, validateFileSize, downloadBlob } from '../../core/ffmpeg-utils';
+import { getFFmpeg, terminateFFmpeg, formatSize, validateFileSize, downloadBlob, execWithTimeout, getLargeFileWarning } from '../../core/ffmpeg-utils';
 
 type VideoFormat = 'mp4' | 'mov' | 'avi' | 'mkv' | 'flv' | 'wmv';
 
@@ -13,11 +13,11 @@ const FORMAT_OPTIONS: { value: VideoFormat; label: string }[] = [
 ];
 
 const CODEC_MAP: Record<VideoFormat, string[]> = {
-  mp4: ['-c:v', 'libx264', '-c:a', 'aac', '-movflags', '+faststart'],
-  mov: ['-c:v', 'libx264', '-c:a', 'aac'],
-  avi: ['-c:v', 'libx264', '-c:a', 'mp3'],
-  mkv: ['-c:v', 'libx264', '-c:a', 'aac'],
-  flv: ['-c:v', 'libx264', '-c:a', 'aac'],
+  mp4: ['-c:v', 'libx264', '-c:a', 'aac', '-movflags', '+faststart', '-threads', '0'],
+  mov: ['-c:v', 'libx264', '-c:a', 'aac', '-threads', '0'],
+  avi: ['-c:v', 'libx264', '-c:a', 'mp3', '-threads', '0'],
+  mkv: ['-c:v', 'libx264', '-c:a', 'aac', '-threads', '0'],
+  flv: ['-c:v', 'libx264', '-c:a', 'aac', '-threads', '0'],
   wmv: ['-c:v', 'wmv2', '-c:a', 'wmav2'],
 };
 
@@ -109,9 +109,12 @@ export default {
       const err = validateFileSize(file);
       if (err) { fileInfo.style.display = ''; fileInfo.textContent = err; fileInfo.style.color = 'var(--color-error)'; return; }
       inputFile = file;
+      const warn = getLargeFileWarning(file);
       fileInfo.style.display = '';
-      fileInfo.textContent = `${file.name} (${formatSize(file.size)})`;
-      fileInfo.style.color = '';
+      fileInfo.textContent = warn
+        ? `${file.name} (${formatSize(file.size)}) — ${warn}`
+        : `${file.name} (${formatSize(file.size)})`;
+      fileInfo.style.color = warn ? 'var(--color-warning)' : '';
       resultDiv.style.display = 'none';
     }
 
@@ -142,7 +145,7 @@ export default {
         statusEl.textContent = '转换中...';
         const outputName = 'output.' + ext;
         const args = ['-i', inputName, ...CODEC_MAP[ext], '-y', outputName];
-        await ffmpeg.exec(args);
+        await execWithTimeout(ffmpeg, args);
 
         const data = await ffmpeg.readFile(outputName);
         outputBlob = new Blob([(data as Uint8Array).buffer as ArrayBuffer], { type: `video/${ext}` });
