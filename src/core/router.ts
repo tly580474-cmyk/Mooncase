@@ -64,6 +64,8 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   'password-gen': () => import('../pages/tools/password-gen'),
   'uuid-gen': () => import('../pages/tools/uuid-gen'),
   'lorem-gen': () => import('../pages/tools/lorem-gen'),
+  'qr-code': () => import('../pages/tools/qr-code'),
+  'qr-scan': () => import('../pages/tools/qr-scan'),
   // 图片工具
   'image-compress': () => import('../pages/tools/image-compress'),
   'image-crop': () => import('../pages/tools/image-crop'),
@@ -77,8 +79,10 @@ const toolLoaders: Record<string, () => Promise<ToolModule>> = {
   // 安全工具
   'hash-gen': () => import('../pages/tools/hash-gen'),
   'hmac-gen': () => import('../pages/tools/hmac-gen'),
-  // 实用工具
-  'qr-code': () => import('../pages/tools/qr-code'),
+  'http-tester': () => import('../pages/tools/http-tester'),
+  'symmetric-crypto': () => import('../pages/tools/symmetric-crypto'),
+  'caesar-cipher': () => import('../pages/tools/caesar-cipher'),
+  'rail-fence': () => import('../pages/tools/rail-fence'),
   // 网络工具
   'ip-query': () => import('../pages/tools/ip-query'),
   'online-ping': () => import('../pages/tools/online-ping'),

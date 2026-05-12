@@ -211,6 +211,14 @@ const registry: ToolMeta[] = [
     tags: ['qr', '二维码', '生成'],
   },
   {
+    id: 'qr-scan',
+    name: '二维码扫描',
+    icon: 'qr_code_scanner',
+    category: 'generator',
+    description: '通过摄像头或图片识别二维码',
+    tags: ['qr', '二维码', '扫描', '识别', 'scan'],
+  },
+  {
     id: 'base64',
     name: 'Base64 编码',
     icon: 'code',
@@ -428,6 +436,38 @@ const registry: ToolMeta[] = [
     category: 'security',
     description: '使用密钥生成 HMAC 签名',
     tags: ['hmac', '签名', '安全', '密钥'],
+  },
+  {
+    id: 'http-tester',
+    name: 'HTTP 请求测试器',
+    icon: 'http',
+    category: 'security',
+    description: '发送 HTTP 请求并查看响应',
+    tags: ['http', 'request', '请求', '测试', 'api'],
+  },
+  {
+    id: 'symmetric-crypto',
+    name: '对称加密',
+    icon: 'lock',
+    category: 'security',
+    description: 'AES-256-GCM / CBC 加密解密',
+    tags: ['aes', '加密', '对称', 'crypto', '密钥'],
+  },
+  {
+    id: 'caesar-cipher',
+    name: '凯撒密码',
+    icon: 'swap_horiz',
+    category: 'security',
+    description: '字母位移加密，支持暴力枚举',
+    tags: ['caesar', '凯撒', '位移', '密码', '暴力'],
+  },
+  {
+    id: 'rail-fence',
+    name: '栅栏密码',
+    icon: 'grid_view',
+    category: 'security',
+    description: 'Z 字形排列转置加密',
+    tags: ['rail', 'fence', '栅栏', '密码', '转置'],
   },
   // 视频工具
   {
